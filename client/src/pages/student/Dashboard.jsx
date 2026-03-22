@@ -43,6 +43,13 @@ const StudentDashboard = () => {
 
   useEffect(() => { fetchData(); }, []);
 
+useEffect(() => {
+  const timer = setTimeout(() => {
+    fetchData();
+  }, 400);
+  return () => clearTimeout(timer);
+}, [filters.search]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     fetchData();
@@ -82,12 +89,13 @@ const StudentDashboard = () => {
 
           {/* Search bar */}
           <form onSubmit={handleSearch} className="flex gap-2 max-w-2xl">
-            <input
-              type="text" name="search" value={filters.search}
-              onChange={handleFilterChange}
-              placeholder="Search internships, domains, skills..."
-              className="flex-1 px-4 py-3 rounded-lg text-gray-900 text-sm focus:outline-none"
-            />
+           <input
+  type="text" name="search" value={filters.search}
+  onChange={handleFilterChange}
+  onKeyDown={(e) => { if (e.key === 'Enter') fetchData(); }}
+  placeholder="Search internships, domains, skills..."
+  className="flex-1 px-4 py-3 rounded-lg text-gray-900 text-sm focus:outline-none"
+/>
             <button type="submit" className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-medium hover:bg-indigo-50 transition">
               Search
             </button>

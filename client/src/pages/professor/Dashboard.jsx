@@ -287,7 +287,7 @@ const ProfessorDashboard = () => {
                                   : 'text-xs px-2 py-1 rounded font-medium bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
                               }
                             >
-                              {s === 'In Review' ? 'Review' : s}
+                              {s === 'Accepted' ? 'Accept' : s === 'In Review' ? 'Mark for Review' : 'Reject'}
                             </button>
                           ))}
                         </div>
