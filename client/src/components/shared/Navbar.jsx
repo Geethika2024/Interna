@@ -1,83 +1,121 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useState } from 'react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  return (
-    <nav style={{ backgroundColor: '#1a2744' }} className="sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+  const isActive = (path) => location.pathname === path;
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
-            <div style={{ backgroundColor: '#c9a84c' }} className="w-9 h-9 rounded-lg flex items-center justify-center shadow">
-              <span className="text-white font-bold text-sm" style={{ fontFamily: 'Playfair Display, serif' }}>In</span>
-            </div>
-            <span className="text-xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif', letterSpacing: '0.5px' }}>
-              Interna
-            </span>
+  const navLinkStyle = (path) => ({
+    fontSize: '13px',
+    fontWeight: '500',
+    letterSpacing: '0.3px',
+    color: isActive(path) ? '#c9a84c' : 'rgba(255,255,255,0.7)',
+    textDecoration: 'none',
+    paddingBottom: '2px',
+    borderBottom: isActive(path) ? '1px solid #c9a84c' : '1px solid transparent',
+    transition: 'all 0.2s'
+  });
+
+  return (
+    <nav style={{ backgroundColor: '#1a2744', borderBottom: '1px solid rgba(201,168,76,0.15)' }}
+      className="sticky top-0 z-50">
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px' }}>
+
+          {/* Logo text only */}
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{
+              fontFamily: 'Playfair Display, serif',
+              fontSize: '22px', fontWeight: '700',
+              color: 'white', letterSpacing: '0.5px'
+            }}>Interna</span>
+            <span style={{
+              fontSize: '9px', color: '#c9a84c',
+              letterSpacing: '2px', textTransform: 'uppercase',
+              marginTop: '4px', fontWeight: '500'
+            }}>Portal</span>
           </Link>
 
           {/* Nav Links */}
           {user && (
-            <div className="hidden md:flex items-center gap-8">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
               {user.role === 'student' ? (
                 <>
-                  <Link to="/student/dashboard" className="text-gray-300 hover:text-yellow-400 text-sm font-medium transition">Browse</Link>
-                  <Link to="/student/wishlist" className="text-gray-300 hover:text-yellow-400 text-sm font-medium transition">Wishlist</Link>
-                  <Link to="/student/applications" className="text-gray-300 hover:text-yellow-400 text-sm font-medium transition">My Applications</Link>
+                  <Link to="/student/dashboard" style={navLinkStyle('/student/dashboard')}>Browse</Link>
+                  <Link to="/student/wishlist" style={navLinkStyle('/student/wishlist')}>Wishlist</Link>
+                  <Link to="/student/applications" style={navLinkStyle('/student/applications')}>My Applications</Link>
                 </>
               ) : (
                 <>
-                  <Link to="/professor/dashboard" className="text-gray-300 hover:text-yellow-400 text-sm font-medium transition">My Internships</Link>
-                  <Link to="/professor/applicants" className="text-gray-300 hover:text-yellow-400 text-sm font-medium transition">Applicants</Link>
-                  <Link to="/professor/post" className="text-gray-300 hover:text-yellow-400 text-sm font-medium transition">Post Internship</Link>
+                  <Link to="/professor/dashboard" style={navLinkStyle('/professor/dashboard')}>My Internships</Link>
+                  <Link to="/professor/applicants" style={navLinkStyle('/professor/applicants')}>Applicants</Link>
+                  <Link to="/professor/post" style={navLinkStyle('/professor/post')}>Post Internship</Link>
                 </>
               )}
             </div>
           )}
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
-            {user ? (
-              <>
-                <div className="hidden md:flex items-center gap-3">
-                  <div style={{ backgroundColor: '#c9a84c' }} className="w-8 h-8 rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">{user.name.charAt(0).toUpperCase()}</span>
-                  </div>
-                  <span className="text-sm text-gray-300">
-                    <span className="text-white font-medium">{user.name}</span>
-                  </span>
-                  <span style={{ backgroundColor: 'rgba(201,168,76,0.2)', color: '#c9a84c' }} className="text-xs px-2 py-1 rounded-full font-medium border border-yellow-600">
-                    {user.role}
-                  </span>
+          {user && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              {/* Avatar + name */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '34px', height: '34px',
+                  backgroundColor: '#c9a84c',
+                  borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '13px', fontWeight: '700', color: 'white'
+                }}>
+                  {user.name.charAt(0).toUpperCase()}
                 </div>
-                <button
-                  onClick={handleLogout}
-                  style={{ borderColor: '#c9a84c', color: '#c9a84c' }}
-                  className="text-sm border px-4 py-1.5 rounded-lg hover:bg-yellow-600 hover:text-white transition font-medium"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="text-sm text-gray-300 hover:text-white font-medium transition">Login</Link>
-                <Link to="/signup" style={{ backgroundColor: '#c9a84c' }} className="text-sm text-white px-4 py-2 rounded-lg hover:opacity-90 font-medium transition">
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
+                <div>
+                  <p style={{ fontSize: '13px', color: 'white', fontWeight: '500', lineHeight: '1.2' }}>
+                    {user.name}
+                  </p>
+                  <p style={{ fontSize: '10px', color: '#c9a84c', letterSpacing: '1px', textTransform: 'uppercase' }}>
+                    {user.role}
+                  </p>
+                </div>
+              </div>
+
+              {/* Logout button */}
+              <button
+                onClick={handleLogout}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(201,168,76,0.4)',
+                  color: '#c9a84c',
+                  padding: '7px 16px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  letterSpacing: '1px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={e => {
+                  e.target.style.backgroundColor = '#c9a84c';
+                  e.target.style.color = '#1a2744';
+                }}
+                onMouseLeave={e => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = '#c9a84c';
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          )}
+
         </div>
       </div>
     </nav>
