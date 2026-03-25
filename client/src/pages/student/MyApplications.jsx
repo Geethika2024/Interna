@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
 
 const MyApplications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchApps = async () => {
@@ -20,72 +22,137 @@ const MyApplications = () => {
     fetchApps();
   }, []);
 
+  const getStatusStyle = (status) => {
+    if (status === 'Applied') return { backgroundColor: '#eff6ff', color: '#1d4ed8', border: '1px solid #bfdbfe' };
+    if (status === 'In Review') return { backgroundColor: '#fffbeb', color: '#b45309', border: '1px solid #fde68a' };
+    if (status === 'Accepted') return { backgroundColor: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0' };
+    if (status === 'Rejected') return { backgroundColor: '#fef2f2', color: '#b91c1c', border: '1px solid #fecaca' };
+    return {};
+  };
+
+  const getModeStyle = (mode) => ({
+    fontSize: '12px',
+    backgroundColor: mode === 'Online' ? '#e8f5ee' : '#fff3e0',
+    color: mode === 'Online' ? '#2d7a4f' : '#e65100',
+    padding: '4px 12px', borderRadius: '20px', fontWeight: '600'
+  });
+
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f5f3ee' }}>
+      <div style={{ width: '40px', height: '40px', border: '3px solid #e8e4d9', borderTopColor: '#c9a84c', borderRadius: '50%' }}></div>
     </div>
   );
 
-  const getStatusClass = (status) => {
-    if (status === 'Applied') return 'bg-blue-50 text-blue-700 border-blue-200';
-    if (status === 'In Review') return 'bg-yellow-50 text-yellow-700 border-yellow-200';
-    if (status === 'Accepted') return 'bg-green-50 text-green-700 border-green-200';
-    if (status === 'Rejected') return 'bg-red-50 text-red-700 border-red-200';
-    return '';
-  };
-
-  const getModeClass = (mode) => {
-    if (mode === 'Online') return 'text-xs px-2 py-1 rounded-full bg-green-50 text-green-700';
-    return 'text-xs px-2 py-1 rounded-full bg-orange-50 text-orange-700';
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">My Applications</h1>
+    <div style={{ minHeight: '100vh', backgroundColor: '#f5f3ee' }}>
+
+      {/* Header */}
+      <div style={{ backgroundColor: '#1a2744', borderBottom: '1px solid rgba(201,168,76,0.2)', padding: '28px 32px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <h1 style={{ fontFamily: 'Playfair Display, serif', fontSize: '26px', fontWeight: '700', color: 'white', marginBottom: '4px' }}>
+            My Applications
+          </h1>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.4)' }}>
+            {applications.length} application{applications.length !== 1 ? 's' : ''} submitted
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: '860px', margin: '0 auto', padding: '40px 32px' }}>
 
         {applications.length === 0 ? (
-          <div className="bg-white border border-gray-200 rounded-2xl p-16 text-center">
-            <div className="text-5xl mb-4">📋</div>
-            <p className="text-lg font-medium text-gray-700">No applications yet</p>
-            <p className="text-gray-400 text-sm mt-1">Browse internships and apply to get started</p>
+          <div style={{ textAlign: 'center', padding: '80px 20px', backgroundColor: 'white', borderRadius: '16px', border: '1px solid #e8e4d9' }}>
+            <p style={{ fontSize: '48px', marginBottom: '20px' }}>📋</p>
+            <p style={{ fontSize: '18px', fontWeight: '700', color: '#1a2744', marginBottom: '8px', fontFamily: 'Playfair Display, serif' }}>
+              No applications yet
+            </p>
+            <p style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '24px' }}>
+              Browse internships and apply to get started
+            </p>
+            <button
+              onClick={() => navigate('/student/dashboard')}
+              style={{ backgroundColor: '#1a2744', color: 'white', border: 'none', borderRadius: '8px', padding: '12px 28px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+            >
+              Browse Internships
+            </button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {applications.map(app => {
               const internship = app.internshipId;
+              const daysLeft = Math.ceil((new Date(internship?.deadline) - new Date()) / (1000 * 60 * 60 * 24));
               return (
-                <div key={app._id} className="bg-white border border-gray-200 rounded-xl p-6">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 text-lg">{internship?.title}</h3>
-                      <p className="text-gray-500 text-sm mt-0.5">
+                <div key={app._id} style={{
+                  backgroundColor: 'white', border: '1px solid #e8e4d9',
+                  borderRadius: '14px', padding: '28px 32px',
+                  position: 'relative', overflow: 'hidden',
+                  transition: 'all 0.2s'
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#c9a84c'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(201,168,76,0.1)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#e8e4d9'; e.currentTarget.style.boxShadow = 'none'; }}
+                >
+                  {/* Left accent */}
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '4px', backgroundColor: '#1a2744', borderRadius: '14px 0 0 14px' }}></div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ flex: 1 }}>
+
+                      {/* Title + professor */}
+                      <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: '18px', fontWeight: '700', color: '#1a2744', marginBottom: '5px' }}>
+                        {internship?.title}
+                      </h3>
+                      <p style={{ fontSize: '13px', color: '#9ca3af', marginBottom: '16px' }}>
                         {internship?.professorId?.name} · {internship?.iitName}
                       </p>
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        <span className={getModeClass(internship?.mode)}>
-                          {internship?.mode}
+
+                      {/* Tags */}
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                        <span style={getModeStyle(internship?.mode)}>{internship?.mode}</span>
+                        <span style={{ fontSize: '12px', backgroundColor: '#f0ebe0', color: '#8a6c2a', padding: '4px 12px', borderRadius: '20px', fontWeight: '600' }}>
+                          {internship?.domain}
                         </span>
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                          Deadline: {new Date(internship?.deadline).toLocaleDateString('en-IN')}
-                        </span>
-                        <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
-                          Applied: {new Date(app.createdAt).toLocaleDateString('en-IN')}
-                        </span>
+                        {internship?.duration && (
+                          <span style={{ fontSize: '12px', backgroundColor: '#f3f4f6', color: '#6b7280', padding: '4px 12px', borderRadius: '20px' }}>
+                            {internship?.duration}
+                          </span>
+                        )}
                       </div>
-                      {app.resumeUrl && (
-                        <a
-                          href={"http://localhost:5000" + app.resumeUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-indigo-600 text-sm mt-3 hover:underline"
-                        >
-                          View Resume
-                        </a>
-                      )}
+
+                      {/* Dates row */}
+                      <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                        <div>
+                          <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9ca3af', marginBottom: '2px' }}>Applied on</p>
+                          <p style={{ fontSize: '13px', fontWeight: '600', color: '#1a2744' }}>
+                            {new Date(app.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9ca3af', marginBottom: '2px' }}>Deadline</p>
+                          <p style={{ fontSize: '13px', fontWeight: '600', color: daysLeft <= 3 ? '#dc2626' : '#1a2744' }}>
+                            {new Date(internship?.deadline).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </p>
+                        </div>
+                        {app.resumeUrl && (
+                          <div>
+                            <p style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase', color: '#9ca3af', marginBottom: '2px' }}>Resume</p>
+
+  <a href={"http://localhost:5000" + app.resumeUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  style={{ fontSize: '13px', fontWeight: '600', color: '#c9a84c', textDecoration: 'none' }}
+>
+  View PDF ↗
+</a>
+                              
+                            
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="ml-4">
-                      <span className={"text-sm font-medium px-3 py-1.5 rounded-full border " + getStatusClass(app.status)}>
+
+                    {/* Status badge */}
+                    <div style={{ marginLeft: '24px', textAlign: 'center' }}>
+                      <span style={{ ...getStatusStyle(app.status), fontSize: '12px', fontWeight: '700', padding: '8px 16px', borderRadius: '20px', display: 'block', whiteSpace: 'nowrap' }}>
                         {app.status}
                       </span>
                     </div>

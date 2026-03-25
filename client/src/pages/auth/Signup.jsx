@@ -5,16 +5,21 @@ import API from '../../api/axios';
 import toast from 'react-hot-toast';
 
 const Signup = () => {
+  const [role, setRole] = useState('student');
   const [form, setForm] = useState({
     name: '', email: '', password: '', role: 'student',
     department: '', iitName: '', facultyCode: ''
   });
   const [loading, setLoading] = useState(false);
-  const { login }   = useAuth();
-  const navigate    = useNavigate();
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const serif = { fontFamily: 'Playfair Display, serif' };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+
+  const handleRoleChange = (r) => {
+    setRole(r);
+    setForm({ ...form, role: r });
   };
 
   const handleSubmit = async (e) => {
@@ -24,11 +29,8 @@ const Signup = () => {
       const { data } = await API.post('/auth/register', form);
       login(data.token, data.user);
       toast.success('Account created successfully!');
-      if (data.user.role === 'student') {
-        navigate('/student/dashboard');
-      } else {
-        navigate('/professor/dashboard');
-      }
+      if (data.user.role === 'student') navigate('/student/dashboard');
+      else navigate('/professor/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Signup failed');
     } finally {
@@ -36,122 +38,159 @@ const Signup = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-10">
-      <div className="max-w-md w-full">
+  const inputStyle = {
+    width: '100%', border: 'none',
+    borderBottom: '1px solid #e5e7eb',
+    padding: '12px 0', fontSize: '14px',
+    color: '#1a2744', outline: 'none',
+    backgroundColor: 'transparent',
+    letterSpacing: '0.3px'
+  };
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-lg">In</span>
+  const labelStyle = {
+    display: 'block', fontSize: '10px',
+    fontWeight: '700', letterSpacing: '2px',
+    textTransform: 'uppercase', color: '#9ca3af',
+    marginBottom: '4px'
+  };
+
+  return (
+    <div className="min-h-screen flex">
+
+      {/* Left Panel */}
+      <div style={{ backgroundColor: '#1a2744', width: '42%' }}
+        className="hidden lg:flex flex-col items-center justify-center p-12 relative overflow-hidden">
+
+        {/* Dot texture */}
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: 'radial-gradient(circle at 1px 1px, #c9a84c 1px, transparent 0)', backgroundSize: '32px 32px' }}></div>
+
+        {/* Circles */}
+        <div style={{ position: 'absolute', top: '-120px', right: '-120px', width: '350px', height: '350px', borderRadius: '50%', border: '1px solid rgba(201,168,76,0.12)' }}></div>
+        <div style={{ position: 'absolute', bottom: '-80px', left: '-80px', width: '280px', height: '280px', borderRadius: '50%', border: '1px solid rgba(201,168,76,0.08)' }}></div>
+
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 10, textAlign: 'center' }}>
+         
+          <h1 style={{ ...serif, color: 'white', fontSize: '36px', fontWeight: '700', marginBottom: '8px' }}>Interna</h1>
+          <p style={{ color: '#c9a84c', fontSize: '10px', letterSpacing: '4px', textTransform: 'uppercase', marginBottom: '40px' }}>
+            Research Internship Portal
+          </p>
+          <div style={{ width: '40px', height: '2px', backgroundColor: '#c9a84c', margin: '0 auto 32px' }}></div>
+          <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', lineHeight: '1.9', maxWidth: '260px' }}>
+            Join thousands of students and professors building the future of research in India.
+          </p>
+
+          {/* Stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginTop: '48px' }}>
+            {[
+              { value: '2000+', label: 'Students' },
+              { value: '150+', label: 'Professors' },
+              { value: '500+', label: 'Internships' },
+            ].map(s => (
+              <div key={s.label} style={{ borderColor: 'rgba(201,168,76,0.25)', backgroundColor: 'rgba(201,168,76,0.05)', border: '1px solid rgba(201,168,76,0.25)', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                <div style={{ ...serif, color: '#c9a84c', fontSize: '20px', fontWeight: '700' }}>{s.value}</div>
+                <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '4px' }}>{s.label}</div>
+              </div>
+            ))}
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Create your account</h1>
-          <p className="text-gray-500 mt-1">Join Interna with your IIT email</p>
+        </div>
+      </div>
+
+      {/* Right Panel */}
+      <div style={{ flex: 1, backgroundColor: '#ffffff' }} className="flex flex-col">
+
+        {/* Top right */}
+        <div className="flex justify-end p-8">
+          <Link to="/login" style={{ color: '#9ca3af', fontSize: '13px' }} className="hover:text-gray-600 transition">
+            Already have an account? Sign in
+          </Link>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="flex-1 flex items-center justify-center px-10 pb-12">
+          <div style={{ width: '100%', maxWidth: '400px' }}>
 
-            {/* Role Toggle */}
-            <div className="flex rounded-lg border border-gray-200 p-1 gap-1">
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, role: 'student' })}
-                className={`flex-1 py-2 rounded-md text-sm font-medium transition ${
-                  form.role === 'student'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
+            <h2 style={{ ...serif, color: '#1a2744', fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>
+              Create Account
+            </h2>
+            <p style={{ color: '#9ca3af', fontSize: '13px', marginBottom: '32px' }}>
+              Join Interna with your IIT email
+            </p>
+
+            {/* Role tabs */}
+            <div style={{ display: 'flex', border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', marginBottom: '32px' }}>
+              <button type="button" onClick={() => handleRoleChange('student')}
+                style={{ flex: 1, padding: '12px', fontSize: '13px', fontWeight: '600', backgroundColor: role === 'student' ? '#1a2744' : 'white', color: role === 'student' ? 'white' : '#9ca3af', border: 'none', cursor: 'pointer', transition: 'all 0.2s' }}>
                 Student
               </button>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, role: 'professor' })}
-                className={`flex-1 py-2 rounded-md text-sm font-medium transition ${
-                  form.role === 'professor'
-                    ? 'bg-indigo-600 text-white'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
+              <button type="button" onClick={() => handleRoleChange('professor')}
+                style={{ flex: 1, padding: '12px', fontSize: '13px', fontWeight: '600', backgroundColor: role === 'professor' ? '#1a2744' : 'white', color: role === 'professor' ? 'white' : '#9ca3af', border: 'none', cursor: 'pointer', borderLeft: '1px solid #e5e7eb', transition: 'all 0.2s' }}>
                 Professor
               </button>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <input
-                type="text" name="name" value={form.name}
-                onChange={handleChange} placeholder="Your full name" required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
+            <form onSubmit={handleSubmit}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">IIT Email</label>
-              <input
-                type="email" name="email" value={form.email}
-                onChange={handleChange} placeholder="you@iitb.ac.in" required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                type="password" name="password" value={form.password}
-                onChange={handleChange} placeholder="••••••••" required
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
-            </div>
-
-            {/* Professor-only fields */}
-            {form.role === 'professor' && (
-              <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">IIT Name</label>
-                  <input
-                    type="text" name="iitName" value={form.iitName}
-                    onChange={handleChange} placeholder="e.g. IIT Bombay" required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                  <label style={labelStyle}>Full Name</label>
+                  <input type="text" name="name" value={form.name} onChange={handleChange}
+                    placeholder="Your full name" required style={inputStyle} />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                  <input
-                    type="text" name="department" value={form.department}
-                    onChange={handleChange} placeholder="e.g. Computer Science" required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                  <label style={labelStyle}>IIT Email Address</label>
+                  <input type="email" name="email" value={form.email} onChange={handleChange}
+                    placeholder="you@iitb.ac.in" required style={inputStyle} />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Faculty Code</label>
-                  <input
-                    type="text" name="facultyCode" value={form.facultyCode}
-                    onChange={handleChange} placeholder="e.g. FAC001" required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <p className="text-xs text-gray-400 mt-1">Valid codes: FAC001–FAC005, IIT001–IIT005, PROF01–PROF05</p>
+                  <label style={labelStyle}>Password</label>
+                  <input type="password" name="password" value={form.password} onChange={handleChange}
+                    placeholder="Create a password" required style={inputStyle} />
                 </div>
-              </>
-            )}
 
-            <button
-              type="submit" disabled={loading}
-              className="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50 transition"
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
+                {/* Professor fields */}
+                {role === 'professor' && (
+                  <>
+                    <div>
+                      <label style={labelStyle}>IIT Name</label>
+                      <input type="text" name="iitName" value={form.iitName} onChange={handleChange}
+                        placeholder="e.g. IIT Bombay" required style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Department</label>
+                      <input type="text" name="department" value={form.department} onChange={handleChange}
+                        placeholder="e.g. Computer Science" required style={inputStyle} />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Faculty Code</label>
+                      <input type="text" name="facultyCode" value={form.facultyCode} onChange={handleChange}
+                        placeholder="e.g. FAC001" required style={inputStyle} />
+                      <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '6px' }}>
+                        Valid codes: FAC001–FAC005, IIT001–IIT005, PROF01–PROF05
+                      </p>
+                    </div>
+                  </>
+                )}
 
-          </form>
+                <div style={{ paddingTop: '8px' }}>
+                  <button type="submit" disabled={loading}
+                    style={{ width: '100%', backgroundColor: '#c9a84c', color: 'white', border: 'none', padding: '15px', borderRadius: '8px', fontSize: '13px', fontWeight: '700', letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', opacity: loading ? 0.7 : 1, transition: 'opacity 0.2s' }}>
+                    {loading ? 'Creating account...' : 'Create Account'}
+                  </button>
+                </div>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Already have an account?{' '}
-            <Link to="/login" className="text-indigo-600 font-medium hover:underline">Sign in</Link>
-          </p>
+              </div>
+            </form>
+
+            <p style={{ textAlign: 'center', fontSize: '13px', color: '#9ca3af', marginTop: '28px' }}>
+              Already have an account?{' '}
+              <Link to="/login" style={{ color: '#c9a84c', fontWeight: '600' }}>Sign in</Link>
+            </p>
+
+          </div>
         </div>
-
       </div>
     </div>
   );

@@ -14,12 +14,16 @@ router.get('/', protect, async (req, res) => {
     let filter = { isActive: true };
 
     if (search) {
-      filter.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { domain: { $regex: search, $options: 'i' } }
-      ];
-    }
+  filter.$or = [
+    { title: { $regex: search, $options: 'i' } },
+    { description: { $regex: search, $options: 'i' } },
+    { domain: { $regex: search, $options: 'i' } },
+    { iitName: { $regex: search, $options: 'i' } },
+    { mode: { $regex: search, $options: 'i' } },
+    { duration: { $regex: search, $options: 'i' } },
+    { skills: { $elemMatch: { $regex: search, $options: 'i' } } }
+  ];
+}
     if (iitName)    filter.iitName = { $regex: iitName, $options: 'i' };
     if (domain)     filter.domain  = { $regex: domain,  $options: 'i' };
     if (mode)       filter.mode    = mode;
